@@ -1,3 +1,41 @@
+/* ------------------------------------------------------------------- scene */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.scene__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* trees breathe very slowly for a living, dreamy feel */
+.scene__tree {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: tree-sway 11s ease-in-out infinite;
+}
+
+.scene__tree--right {
+  animation-duration: 13s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes tree-sway {
+  0%,
+  100% {
+    transform: rotate(-0.6deg);
+  }
+  50% {
+    transform: rotate(0.6deg);
+  }
+}
+
 /* ------------------------------------------------------------------ layout */
 .app {
   position: relative;
@@ -613,6 +651,7 @@
 @media (prefers-reduced-motion: reduce) {
   .sakura,
   .spirits,
+  .scene__tree,
   .reel-col__strip {
     animation: none !important;
   }

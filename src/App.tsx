@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 
 import './App.css'
+import { BlossomScene } from './components/BlossomScene'
 import { FileDrop } from './components/FileDrop'
 import { SakuraBackground } from './components/SakuraBackground'
 import { SlotReel } from './components/SlotReel'
@@ -78,6 +79,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <BlossomScene />
       <SakuraBackground />
       <Spirits />
 

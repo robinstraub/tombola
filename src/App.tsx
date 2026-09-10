@@ -27,6 +27,8 @@ export default function App() {
     setWinner(null)
   }, [])
 
+  // A single action drives the whole draw: from idle *or* from a revealed
+  // winner it immediately starts spinning again — no intermediate click.
   const spin = useCallback(() => {
     if (phase === 'spinning' || remaining.length === 0) return
 
@@ -41,11 +43,6 @@ export default function App() {
       setPhase('revealed')
     }, SPIN_DURATION_MS)
   }, [phase, remaining.length, draw])
-
-  const nextDraw = useCallback(() => {
-    setPhase('idle')
-    setWinner(null)
-  }, [])
 
   const restart = useCallback(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
@@ -65,6 +62,19 @@ export default function App() {
 
   const hasParticipants = participants.length > 0
   const poolEmpty = hasParticipants && remaining.length === 0
+
+  let mainButtonLabel: string
+  if (poolEmpty) {
+    mainButtonLabel = 'Tous les participants ont été tirés'
+  } else if (phase === 'spinning') {
+    mainButtonLabel = 'Le sort en décide…'
+  } else if (phase === 'revealed') {
+    mainButtonLabel = 'Lancer le tirage suivant'
+  } else if (winners.length > 0) {
+    mainButtonLabel = 'Lancer le tirage suivant'
+  } else {
+    mainButtonLabel = 'Lancer le tirage'
+  }
 
   return (
     <div className="app">
@@ -88,34 +98,23 @@ export default function App() {
             </div>
 
             <div className="stage__controls">
-              {phase !== 'revealed' && !poolEmpty && (
-                <button
-                  type="button"
-                  className="btn btn--primary"
-                  onClick={spin}
-                  disabled={phase === 'spinning'}
-                >
-                  {phase === 'spinning' ? 'Le sort en décide…' : 'Lancer le tirage'}
-                </button>
-              )}
-
-              {phase === 'revealed' && (
-                <button
-                  type="button"
-                  className="btn btn--primary"
-                  onClick={nextDraw}
-                  disabled={remaining.length === 0}
-                >
-                  {remaining.length === 0 ? 'Plus de participants' : 'Tirage suivant'}
-                </button>
-              )}
-
-              <button type="button" className="btn btn--ghost" onClick={restart}>
-                Réinitialiser
+              <button
+                type="button"
+                className="btn btn--primary btn--hero"
+                onClick={spin}
+                disabled={phase === 'spinning' || poolEmpty}
+              >
+                {mainButtonLabel}
               </button>
-              <button type="button" className="btn btn--ghost" onClick={clearAll}>
-                Changer de fichier
-              </button>
+
+              <div className="stage__controls-secondary">
+                <button type="button" className="btn btn--ghost btn--sm" onClick={restart}>
+                  Réinitialiser
+                </button>
+                <button type="button" className="btn btn--ghost btn--sm" onClick={clearAll}>
+                  Changer de fichier
+                </button>
+              </div>
             </div>
 
             <div className="stage__meta">

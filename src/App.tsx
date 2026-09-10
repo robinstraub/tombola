@@ -1,12 +1,17 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import './App.css'
+import { Confetti } from './components/Confetti'
 import { FileDrop } from './components/FileDrop'
 import { SakuraBackground } from './components/SakuraBackground'
 import { SlotReel } from './components/SlotReel'
+import { ThemeSwitcher } from './components/ThemeSwitcher'
 import { useDraw } from './hooks/useDraw'
 import { prizeForRank } from './lib/prizes'
+import { DEFAULT_THEME, confettiColorsFor, type ThemeId } from './lib/themes'
 import type { DrawPhase, Participant } from './types'
+
+const THEME_STORAGE_KEY = 'tombola-theme'
 
 const SPIN_MIN_MS = 500
 const SPIN_MAX_MS = 3200
@@ -18,7 +23,18 @@ export default function App() {
   const [phase, setPhase] = useState<DrawPhase>('idle')
   const [winner, setWinner] = useState<Participant | null>(null)
   const [spinDuration, setSpinDuration] = useState(SPIN_DEFAULT_MS)
+  const [theme, setTheme] = useState<ThemeId>(() => {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY)
+    return saved === 'spirit' || saved === 'poster' ? saved : DEFAULT_THEME
+  })
   const timeoutRef = useRef<number | null>(null)
+
+  // Drive the theme through a data attribute on <html> so all CSS variables
+  // (and the body background) swap in one place. Persisted across reloads.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem(THEME_STORAGE_KEY, theme)
+  }, [theme])
 
   const { remaining, winners, draw, reset } = useDraw(participants)
 
@@ -29,14 +45,21 @@ export default function App() {
     setWinner(null)
   }, [])
 
-  // A single action drives the whole draw: from idle *or* from a revealed
-  // winner it immediately starts spinning again — no intermediate click.
-  // The actual pick happens only when the reel stops, so the winner never
-  // appears in the side list while the wheel is still spinning.
-  const spin = useCallback(() => {
-    if (phase === 'spinning' || remaining.length === 0) return
+  // The prize currently in play is the one for the next rank to be drawn.
+  const upcomingPrize = prizeForRank(winners.length)
 
+  // First click: announce the prize that's up for grabs (the reel stays calm).
+  const announce = useCallback(() => {
+    if (remaining.length === 0) return
     setWinner(null)
+    setPhase('announced')
+  }, [remaining.length])
+
+  // Second click: roll the reel. The actual pick happens only when it stops, so
+  // the winner never appears in the side list while the wheel is still spinning.
+  const spin = useCallback(() => {
+    if (phase !== 'announced' || remaining.length === 0) return
+
     setPhase('spinning')
 
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
@@ -50,6 +73,9 @@ export default function App() {
       setPhase('revealed')
     }, spinDuration)
   }, [phase, remaining.length, draw, spinDuration])
+
+  // Single primary button: its meaning depends on the phase.
+  const primaryAction = phase === 'announced' ? spin : announce
 
   const restart = useCallback(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
@@ -75,17 +101,26 @@ export default function App() {
     mainButtonLabel = 'Tous les participants ont été tirés'
   } else if (phase === 'spinning') {
     mainButtonLabel = 'Le sort en décide…'
-  } else if (phase === 'revealed') {
-    mainButtonLabel = 'Lancer le tirage suivant'
-  } else if (winners.length > 0) {
-    mainButtonLabel = 'Lancer le tirage suivant'
-  } else {
+  } else if (phase === 'announced') {
+    // We're showing the prize; the next click actually spins the reel.
     mainButtonLabel = 'Lancer le tirage'
+  } else if (phase === 'revealed' || winners.length > 0) {
+    // A winner was just revealed (or some already were): reveal the next prize.
+    mainButtonLabel = 'Lot suivant'
+  } else {
+    mainButtonLabel = 'Découvrir le premier lot'
   }
 
   return (
     <div className="app">
       <SakuraBackground count={14} />
+      <Confetti
+        fireKey={winners.length}
+        active={phase === 'revealed'}
+        colors={confettiColorsFor(theme)}
+      />
+
+      <ThemeSwitcher value={theme} onChange={setTheme} />
 
       <header className="app__header">
         <p className="app__eyebrow">柔道 · JUDO PAYS VILAINE</p>
@@ -99,13 +134,13 @@ export default function App() {
         ) : (
           <div className="stage-layout">
             <div className="stage">
-              <SlotReel phase={phase} winner={winner} />
+              <SlotReel phase={phase} winner={winner} prize={upcomingPrize} />
 
               <div className="stage__controls">
                 <button
                   type="button"
                   className="btn btn--primary btn--hero"
-                  onClick={spin}
+                  onClick={primaryAction}
                   disabled={phase === 'spinning' || poolEmpty}
                 >
                   {mainButtonLabel}

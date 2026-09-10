@@ -6,6 +6,8 @@ import type { DrawPhase, Participant } from '../types'
 interface SlotReelProps {
   phase: DrawPhase
   winner: Participant | null
+  /** Prize currently in play (announced, then won on reveal). */
+  prize?: string | null
   /** Number of vertical glyph columns. */
   columns?: number
 }
@@ -13,25 +15,40 @@ interface SlotReelProps {
 const ROWS_PER_COLUMN = 24
 
 /**
- * A slot-machine style reel. During `spinning` the columns scroll fast; when we
- * switch to `revealed` the columns settle and the centre panel flips to show
- * the winner's name.
+ * A slot-machine style reel with a two-step flow:
+ * - `announced`: a big overlay presents the prize that's up for grabs.
+ * - `spinning` : the columns scroll fast.
+ * - `revealed` : the columns settle and the centre panel shows the winner and,
+ *   underneath, the prize they just won.
  */
-export function SlotReel({ phase, winner, columns = 5 }: SlotReelProps) {
+export function SlotReel({ phase, winner, prize, columns = 5 }: SlotReelProps) {
   return (
     <div className={`reel reel--${phase}`} aria-live="polite">
       <div className="reel__frame">
-        <div className="reel__columns" aria-hidden={phase === 'revealed'}>
+        <div className="reel__columns" aria-hidden={phase === 'revealed' || phase === 'announced'}>
           {Array.from({ length: columns }, (_, i) => (
             <ReelColumn key={i} columnIndex={i} spinning={phase === 'spinning'} />
           ))}
         </div>
 
+        {/* Step 1 — announce the prize before spinning. */}
+        <div className={`reel__prize${phase === 'announced' ? ' reel__prize--shown' : ''}`}>
+          {prize && (
+            <div className="reel__prize-card">
+              <span className="reel__prize-kicker">景品 · PROCHAIN LOT</span>
+              <span className="reel__prize-name">{prize}</span>
+              <span className="reel__prize-sub">À qui la chance ?</span>
+            </div>
+          )}
+        </div>
+
+        {/* Step 3 — reveal the winner and the prize they won. */}
         <div className={`reel__winner${phase === 'revealed' ? ' reel__winner--shown' : ''}`}>
           {winner && (
             <div className="reel__winner-card">
               <span className="reel__winner-kicker">当選 · TŌSEN</span>
               <span className="reel__winner-name">{winner.name}</span>
+              {prize && <span className="reel__winner-prize">remporte&nbsp;: {prize}</span>}
               <span className="reel__winner-sub">おめでとう · Félicitations</span>
             </div>
           )}

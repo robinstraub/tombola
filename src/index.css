@@ -25,9 +25,35 @@
   --font-ui: 'Zen Maru Gothic', 'Noto Sans JP', system-ui, sans-serif;
   --font-jp: 'Noto Sans JP', 'Zen Maru Gothic', sans-serif;
 
+  /* -------- Semantic theme tokens (default = "spirit" / jardin d'esprits) --
+     Overridden per theme via [data-theme] below. Components read these so a
+     theme swap only needs to redefine tokens, not every rule. */
+  --title-color: #7a1f52;
+  --accent: #b06a1e; /* kickers, small labels */
+  --accent-strong: #b06a1e;
+  --btn-primary-grad: linear-gradient(180deg, #a9743f, #8a5a2c, #6f461f);
+  --btn-primary-border: rgba(70, 44, 20, 0.55);
+  --reel-frame-grad: linear-gradient(180deg, #e9d3ac, #d8bd93);
+  --reel-frame-border: rgba(150, 110, 70, 0.5);
+  --winner-name-color: #7a1f52;
+  --mist-veil: rgba(255, 253, 255, 0.5);
+
   color-scheme: light;
   font-family: var(--font-ui);
   color: var(--ink);
+}
+
+/* ---- "Affiche JPV" theme: red lacquer & gold on cream, judo poster mood ---- */
+:root[data-theme='poster'] {
+  --title-color: #b81c1c;
+  --accent: #c8860f;
+  --accent-strong: #b81c1c;
+  --btn-primary-grad: linear-gradient(180deg, #e4342b, #c21f1f, #8a1414);
+  --btn-primary-border: rgba(90, 12, 12, 0.6);
+  --reel-frame-grad: linear-gradient(180deg, #f0c040, #d89a1e);
+  --reel-frame-border: rgba(150, 90, 20, 0.6);
+  --winner-name-color: #b81c1c;
+  --mist-veil: rgba(255, 250, 235, 0.55);
 }
 
 * {
@@ -52,6 +78,30 @@ body {
   overflow-x: hidden;
 }
 
+/* Poster theme drops the painted photo for a flat red/gold field with soft
+   rays, echoing the JPV poster. */
+:root[data-theme='poster'] body {
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(255, 255, 255, 0.5), transparent 55%),
+    repeating-conic-gradient(
+      from 90deg at 50% 32%,
+      rgba(255, 255, 255, 0.14) 0deg 6deg,
+      rgba(255, 255, 255, 0) 6deg 12deg
+    ),
+    linear-gradient(170deg, #fbe7bf 0%, #f6d79a 40%, #e9b64e 100%);
+  background-attachment: fixed;
+}
+
+/* Poster theme adds a red frame band feel around the edges. */
+:root[data-theme='poster'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  box-shadow: inset 0 0 0 14px #e4342b;
+}
+
 /* Soft mist veil that lifts the misty centre so text & controls stay legible
    over the illustration, even on a projector. */
 body::before {
@@ -62,7 +112,7 @@ body::before {
   z-index: 0;
   background: radial-gradient(
     58% 46% at 50% 42%,
-    rgba(255, 253, 255, 0.78),
+    var(--mist-veil),
     rgba(255, 253, 255, 0.28) 55%,
     transparent 78%
   );

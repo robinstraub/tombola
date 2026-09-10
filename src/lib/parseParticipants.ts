@@ -73,8 +73,7 @@ export async function parseParticipants(file: File): Promise<Participant[]> {
 
   for (let r = startRow; r < rows.length; r += 1) {
     const last = String(rows[r]?.[nameColumn] ?? '').trim()
-    const first =
-      firstNameColumn !== null ? String(rows[r]?.[firstNameColumn] ?? '').trim() : ''
+    const first = firstNameColumn !== null ? String(rows[r]?.[firstNameColumn] ?? '').trim() : ''
 
     // "Prénom Nom" when both are present, otherwise whichever we have.
     const name = [first, last].filter(Boolean).join(' ').trim()
@@ -95,8 +94,21 @@ export async function parseParticipants(file: File): Promise<Participant[]> {
 // Hints ordered by strength: a specific "nom participant" wins over a bare
 // "nom", which wins over the softer fallbacks. We scan hints in this order so
 // an export with several name-ish columns still picks the right one.
-const LAST_NAME_HINTS = ['nom participant', 'nom du participant', 'nom', 'name', 'gagnant', 'personne']
-const FIRST_NAME_HINTS = ['prénom participant', 'prénom du participant', 'prénom', 'prenom', 'first name']
+const LAST_NAME_HINTS = [
+  'nom participant',
+  'nom du participant',
+  'nom',
+  'name',
+  'gagnant',
+  'personne',
+]
+const FIRST_NAME_HINTS = [
+  'prénom participant',
+  'prénom du participant',
+  'prénom',
+  'prenom',
+  'first name',
+]
 
 /**
  * Locates the last-name column (and, when present, the matching first-name
@@ -114,7 +126,11 @@ function findNameColumns(header: unknown[] | undefined): {
     return { lastNameColumn: null, firstNameColumn: null }
   }
 
-  const cells = header.map((cell) => String(cell ?? '').toLocaleLowerCase().trim())
+  const cells = header.map((cell) =>
+    String(cell ?? '')
+      .toLocaleLowerCase()
+      .trim(),
+  )
 
   const matchColumn = (hints: string[]): number | null => {
     for (const hint of hints) {

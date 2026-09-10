@@ -2,16 +2,19 @@
 .app {
   position: relative;
   z-index: 1;
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: clamp(1.5rem, 4vh, 3rem) 1.25rem 4rem;
+  /* Centre the content in the viewport; when it grows taller than the screen
+     it simply overflows and the page scrolls, top stays reachable. */
+  justify-content: center;
+  gap: clamp(1.5rem, 4vh, 3rem);
+  padding: clamp(1.5rem, 4vh, 3rem) 1.25rem;
 }
 
 .app__header {
   text-align: center;
-  margin-bottom: clamp(1.5rem, 4vh, 3rem);
 }
 
 .app__eyebrow {
@@ -119,6 +122,22 @@
   padding: 0.6rem 1rem;
   border-radius: 12px;
   font-size: 0.9rem;
+}
+
+.file-drop__sample {
+  color: var(--ink-dim);
+  font-size: 0.88rem;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(232, 195, 122, 0.4);
+  padding-bottom: 1px;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.file-drop__sample:hover {
+  color: var(--gold-soft);
+  border-color: var(--gold);
 }
 
 /* ------------------------------------------------------------------- stage */

@@ -38,8 +38,9 @@ npm run typecheck    # tsc --noEmit
 npm run format       # prettier --write
 ```
 
-Un fichier `participants-exemple.xlsx` est fourni à la racine pour tester
-rapidement.
+Des fichiers d'exemple (`public/participants-exemple.xlsx` et `.csv`) sont
+fournis pour tester rapidement, et téléchargeables directement depuis l'écran
+d'accueil via « Télécharger un fichier d'exemple ».
 
 ## Déploiement
 

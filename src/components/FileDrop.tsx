@@ -82,6 +82,14 @@ export function FileDrop({ onParticipants }: FileDropProps) {
       />
 
       {error && <p className="file-drop__error">{error}</p>}
+
+      <a
+        className="file-drop__sample"
+        href={`${import.meta.env.BASE_URL}participants-exemple.xlsx`}
+        download
+      >
+        <span aria-hidden="true">↓</span> Télécharger un fichier d’exemple
+      </a>
     </div>
   )
 }

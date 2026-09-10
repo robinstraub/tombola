@@ -218,7 +218,11 @@
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  padding: 0 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(255, 251, 244, 0.72);
+  border: 1px solid rgba(150, 110, 70, 0.22);
+  backdrop-filter: blur(4px);
   font-size: 0.85rem;
   color: #6a4a2e;
 }
@@ -285,6 +289,51 @@
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   color: #4a3016;
+}
+
+/* Prize-order checkbox, same register as the speed slider. */
+.order-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(255, 251, 244, 0.72);
+  border: 1px solid rgba(150, 110, 70, 0.22);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  color: #6a4a2e;
+}
+
+.order-toggle__input {
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--accent-strong);
+  cursor: pointer;
+}
+
+.order-toggle__input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.order-toggle__input:disabled + .order-toggle__text {
+  opacity: 0.55;
+}
+
+.order-toggle__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.order-toggle__hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #8a6a48;
 }
 
 .stage__controls-secondary {

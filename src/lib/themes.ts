@@ -13,8 +13,8 @@ export interface ThemeMeta {
 export const THEMES: ThemeMeta[] = [
   {
     id: 'spirit',
-    label: 'Jardin d’esprits',
-    hint: 'Aquarelle onirique, brume & feux-follets',
+    label: 'Cerisiers',
+    hint: 'Aquarelle onirique sous les cerisiers en fleurs',
     confetti: ['#ff5fb0', '#35e6e0', '#f0c06a', '#7a1f52', '#ffffff'],
   },
   {

@@ -7,7 +7,7 @@ import { SakuraBackground } from './components/SakuraBackground'
 import { SlotReel } from './components/SlotReel'
 import { ThemeSwitcher } from './components/ThemeSwitcher'
 import { useDraw } from './hooks/useDraw'
-import { prizeForRank } from './lib/prizes'
+import { type PrizeOrder, prizeForRank } from './lib/prizes'
 import { DEFAULT_THEME, confettiColorsFor, type ThemeId } from './lib/themes'
 import type { DrawPhase, Participant } from './types'
 
@@ -23,6 +23,7 @@ export default function App() {
   const [phase, setPhase] = useState<DrawPhase>('idle')
   const [winner, setWinner] = useState<Participant | null>(null)
   const [spinDuration, setSpinDuration] = useState(SPIN_DEFAULT_MS)
+  const [prizeOrder, setPrizeOrder] = useState<PrizeOrder>('smallToBig')
   const [theme, setTheme] = useState<ThemeId>(() => {
     const saved = localStorage.getItem(THEME_STORAGE_KEY)
     return saved === 'spirit' || saved === 'poster' ? saved : DEFAULT_THEME
@@ -45,8 +46,9 @@ export default function App() {
     setWinner(null)
   }, [])
 
-  // The prize currently in play is the one for the next rank to be drawn.
-  const upcomingPrize = prizeForRank(winners.length)
+  // The prize currently in play is the one for the next rank to be drawn,
+  // resolved through the chosen draw order (small→big by default).
+  const upcomingPrize = prizeForRank(winners.length, prizeOrder)
 
   // First click: announce the prize that's up for grabs (the reel stays calm).
   const announce = useCallback(() => {
@@ -164,6 +166,24 @@ export default function App() {
                   <span className="speed__value">{(spinDuration / 1000).toFixed(1)}&nbsp;s</span>
                 </label>
 
+                <label className="order-toggle">
+                  <input
+                    type="checkbox"
+                    className="order-toggle__input"
+                    checked={prizeOrder === 'bigToSmall'}
+                    onChange={(e) => setPrizeOrder(e.target.checked ? 'bigToSmall' : 'smallToBig')}
+                    disabled={phase === 'spinning' || winners.length > 0}
+                  />
+                  <span className="order-toggle__text">
+                    Commencer par le gros lot
+                    <span className="order-toggle__hint">
+                      {prizeOrder === 'bigToSmall'
+                        ? 'du plus gros au plus petit'
+                        : 'du plus petit au plus gros (suspense)'}
+                    </span>
+                  </span>
+                </label>
+
                 <div className="stage__controls-secondary">
                   <button type="button" className="btn btn--ghost btn--sm" onClick={restart}>
                     Réinitialiser
@@ -193,7 +213,7 @@ export default function App() {
                 </h2>
                 <ol className="winners__list">
                   {winners.map((w, i) => {
-                    const prize = prizeForRank(i)
+                    const prize = prizeForRank(i, prizeOrder)
                     return (
                       <li key={w.id} className="winners__item">
                         <span className="winners__rank">{i + 1}</span>

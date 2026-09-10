@@ -14,9 +14,13 @@ SPA statique (React + TypeScript + Vite), à déployer tel quel sur un CDN
 
 ## Fonctionnalités
 
-- **Dépôt de fichier** par glisser-déposer ou clic (`.xlsx`, `.xls`, `.csv`).
-  La colonne « Nom / Name / Participant… » est détectée automatiquement, sinon
-  la première colonne est utilisée. Doublons et ligne d'en-tête ignorés.
+- **Dépôt de fichier** par glisser-déposer ou clic (`.xlsx`, `.xls`, `.csv`,
+  ainsi que `.numbers` d'Apple). Les colonnes « Nom participant » / « Prénom
+  participant » sont détectées automatiquement et fusionnées (« Prénom Nom ») ;
+  sinon la première colonne est utilisée. La ligne d'en-tête est ignorée.
+- **Un ticket = une chance** : chaque ligne du fichier compte comme une entrée,
+  donc une personne ayant acheté plusieurs tickets garde autant de chances
+  d'être tirée (pas de dédoublonnage par nom).
 - **Roulette machine à sous** : colonnes de kanji / hiragana / katakana qui
   défilent, puis panneau central qui révèle le nom du gagnant.
 - **Tirage sans remise** : une personne tirée est retirée du pool, on ne peut

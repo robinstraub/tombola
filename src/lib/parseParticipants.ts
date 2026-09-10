@@ -3,13 +3,22 @@ import type { Participant } from '../types'
 export class ParseError extends Error {}
 
 /**
- * Reads a spreadsheet (xlsx/xls/csv) and extracts a list of participants.
+ * Reads a spreadsheet and extracts the list of tombola entries.
  *
- * Contract: any CSV/XLSX works. We read the first worksheet and, if the header
- * row happens to name a column ("nom", "name", "président"...), we use it as a
- * convenience — but the default and fallback is always the FIRST column. So a
- * plain file with names in column A just works. Empty cells, a leading header
- * row, and duplicates are skipped.
+ * Supported formats: .xlsx, .xls, .csv and Apple .numbers (SheetJS reads them
+ * all). We read the first worksheet.
+ *
+ * Column detection:
+ * - If the header row names a "last name" column ("Nom participant", "Nom"...),
+ *   we use it — and if a matching "first name" column exists ("Prénom
+ *   participant"...), we join them ("Garance Divet").
+ * - Otherwise we fall back to the FIRST column and keep every row as data, so a
+ *   plain single-column list of names just works.
+ *
+ * Entries vs. people: a raffle export (e.g. HelloAsso) has ONE ROW PER TICKET,
+ * so someone who bought 10 tickets appears 10 times — and must keep 10 chances
+ * in the draw. We therefore DO NOT de-duplicate by name by default: every row
+ * is a chance. (Truly empty rows are still skipped.)
  */
 export async function parseParticipants(file: File): Promise<Participant[]> {
   // Loaded lazily so the ~500 kB SheetJS bundle is only fetched when a user
@@ -30,9 +39,11 @@ export async function parseParticipants(file: File): Promise<Participant[]> {
       workbook = XLSX.read(buffer, { type: 'array' })
     }
   } catch (cause) {
-    throw new ParseError('Impossible de lire le fichier. Vérifie que c’est bien un .xlsx / .csv.', {
-      cause,
-    })
+    throw new ParseError(
+      'Impossible de lire le fichier. Formats acceptés : .xlsx, .xls, .csv ou .numbers (Apple). ' +
+        'Depuis Numbers, tu peux aussi exporter en Excel/CSV.',
+      { cause },
+    )
   }
 
   const sheetName = workbook.SheetNames[0]
@@ -52,25 +63,25 @@ export async function parseParticipants(file: File): Promise<Participant[]> {
   }
 
   // Only treat the first row as a header when it explicitly names a column
-  // ("Nom", "Président"...). Otherwise every row is data — this guarantees a
-  // plain list of names never loses its first entry.
-  const headerColumn = findHeaderColumn(rows[0])
-  const nameColumn = headerColumn ?? 0
-  const startRow = headerColumn === null ? 0 : 1
+  // ("Nom", "Nom participant"...). Otherwise every row is data — this
+  // guarantees a plain list of names never loses its first entry.
+  const { lastNameColumn, firstNameColumn } = findNameColumns(rows[0])
+  const nameColumn = lastNameColumn ?? 0
+  const startRow = lastNameColumn === null ? 0 : 1
 
-  const seen = new Set<string>()
   const participants: Participant[] = []
 
   for (let r = startRow; r < rows.length; r += 1) {
-    const cell = rows[r]?.[nameColumn]
-    const name = String(cell ?? '').trim()
+    const last = String(rows[r]?.[nameColumn] ?? '').trim()
+    const first =
+      firstNameColumn !== null ? String(rows[r]?.[firstNameColumn] ?? '').trim() : ''
+
+    // "Prénom Nom" when both are present, otherwise whichever we have.
+    const name = [first, last].filter(Boolean).join(' ').trim()
     if (!name) continue
 
-    // De-duplicate on the visible name so nobody is entered twice.
-    const key = name.toLocaleLowerCase()
-    if (seen.has(key)) continue
-    seen.add(key)
-
+    // One row = one ticket = one chance: no de-duplication by name. The id is
+    // unique per row so repeat buyers keep every entry they paid for.
     participants.push({ id: `${r}-${name}`, name })
   }
 
@@ -81,28 +92,42 @@ export async function parseParticipants(file: File): Promise<Participant[]> {
   return participants
 }
 
-const NAME_HEADER_HINTS = [
-  'nom',
-  'name',
-  'prénom',
-  'prenom',
-  'participant',
-  'gagnant',
-  'personne',
-  'président',
-  'president',
-]
+// Hints ordered by strength: a specific "nom participant" wins over a bare
+// "nom", which wins over the softer fallbacks. We scan hints in this order so
+// an export with several name-ish columns still picks the right one.
+const LAST_NAME_HINTS = ['nom participant', 'nom du participant', 'nom', 'name', 'gagnant', 'personne']
+const FIRST_NAME_HINTS = ['prénom participant', 'prénom du participant', 'prénom', 'prenom', 'first name']
 
 /**
- * If the first row looks like a header naming a column ("Nom", "Président"...),
- * returns that column's index. Returns `null` when there is no recognisable
- * header — in that case the caller falls back to the first column and keeps
- * every row as data.
+ * Locates the last-name column (and, when present, the matching first-name
+ * column) from the header row. Returns nulls when no header is recognised, in
+ * which case the caller falls back to the first column with every row as data.
+ *
+ * A "nom payeur"/"nom du payeur" column is deliberately ignored: in a HelloAsso
+ * export the participant and the payer can differ, and we draw participants.
  */
-function findHeaderColumn(header: unknown[] | undefined): number | null {
-  if (!header || header.length === 0) return null
-  const index = header.findIndex((cell) =>
-    NAME_HEADER_HINTS.some((hint) => String(cell).toLocaleLowerCase().includes(hint)),
-  )
-  return index >= 0 ? index : null
+function findNameColumns(header: unknown[] | undefined): {
+  lastNameColumn: number | null
+  firstNameColumn: number | null
+} {
+  if (!header || header.length === 0) {
+    return { lastNameColumn: null, firstNameColumn: null }
+  }
+
+  const cells = header.map((cell) => String(cell ?? '').toLocaleLowerCase().trim())
+
+  const matchColumn = (hints: string[]): number | null => {
+    for (const hint of hints) {
+      const index = cells.findIndex(
+        (cell) => cell.includes(hint) && !cell.includes('payeur') && !cell.includes('payé'),
+      )
+      if (index >= 0) return index
+    }
+    return null
+  }
+
+  return {
+    lastNameColumn: matchColumn(LAST_NAME_HINTS),
+    firstNameColumn: matchColumn(FIRST_NAME_HINTS),
+  }
 }

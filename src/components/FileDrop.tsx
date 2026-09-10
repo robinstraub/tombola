@@ -7,7 +7,7 @@ interface FileDropProps {
   onParticipants: (participants: Participant[], fileName: string) => void
 }
 
-const ACCEPTED = '.xlsx,.xls,.csv'
+const ACCEPTED = '.xlsx,.xls,.csv,.numbers'
 
 export function FileDrop({ onParticipants }: FileDropProps) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -66,7 +66,7 @@ export function FileDrop({ onParticipants }: FileDropProps) {
           {loading ? 'Lecture en cours…' : 'Déposer la liste des participants'}
         </span>
         <span className="dropzone__hint">
-          Glisse un fichier .xlsx / .csv ici, ou clique pour parcourir
+          Glisse un fichier .xlsx / .csv / .numbers ici, ou clique pour parcourir
         </span>
       </button>
 

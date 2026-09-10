@@ -1,9 +1,13 @@
 # Tombola du Japon 🌸
 
-Application web de tirage au sort sur le thème du Japon (dojo & sakura), pensée
-pour être projetée devant un public. On dépose un fichier Excel/CSV de
-participants, et une roulette façon machine à sous tire une personne au sort à
-chaque tour.
+> **⚠️ Entièrement _vibe codé_.** Ce dépôt a été produit intégralement au
+> prompt, en pair-programming avec un agent IA. Ce n'est pas un exemple de mon
+> code « à la main » et ce n'est pas représentatif de mes compétences — juste
+> un petit projet fait pour le plaisir et pour aller vite.
+
+Application web de tirage au sort sur le thème du Japon, pensée pour être
+projetée devant un public. On dépose un fichier Excel/CSV de participants, et
+une roulette façon machine à sous tire une personne au sort à chaque tour.
 
 SPA statique (React + TypeScript + Vite), à déployer tel quel sur un CDN
 (Cloudflare Pages, etc.).
@@ -19,8 +23,11 @@ SPA statique (React + TypeScript + Vite), à déployer tel quel sur un CDN
   pas la retirer une seconde fois. On tire autant de fois qu'on veut.
 - **Réinitialiser** (remet tout le monde dans le pool) ou **changer de
   fichier**.
-- Direction artistique dojo : nuit indigo, laque & or, pluie de pétales de
-  cerisier. Titres en typographies japonisantes.
+- **Vitesse réglable** : un curseur sous le bouton principal ajuste la durée du
+  spin de la roulette (de ~0,5 s à ~3,2 s).
+- **Liste des gagnants** en panneau latéral, dans l'ordre du tirage.
+- Direction artistique en registre encre & bois sur fond de jardin japonais
+  peint à l'aquarelle (torii, pavillon, esprits), pluie de pétales de cerisier.
 
 > Les lots ne sont pas gérés dans cette première itération : on tire des
 > personnes, c'est tout.

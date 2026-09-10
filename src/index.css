@@ -46,7 +46,7 @@ body {
   /* Painted spirit-garden backdrop; a lavender wash sits under it so the edges
      of the image blend into the page instead of hard-cropping. */
   background:
-    image-set(url('./spirit-garden.webp') type('image/webp')) center / cover no-repeat,
+    image-set(url('./assets/spirit-garden.webp') type('image/webp')) center / cover no-repeat,
     linear-gradient(165deg, #efe6fb 0%, #e6ecfb 45%, #f3e8f7 100%);
   background-attachment: fixed;
   overflow-x: hidden;

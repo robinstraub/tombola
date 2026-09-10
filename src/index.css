@@ -1,24 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Shippori+Mincho:wght@500;700;800&family=Noto+Sans+JP:wght@400;600;800&display=swap');
 
 :root {
-  /* Palette — indigo dojo night, laque & or, sakura */
-  --indigo-950: #0b1020;
-  --indigo-900: #121a33;
-  --indigo-800: #1b2547;
-  --lacquer: #7a1220;
-  --lacquer-bright: #b5303f;
-  --gold: #e8c37a;
-  --gold-soft: #f3dfae;
-  --sakura: #f7c7d6;
-  --sakura-soft: #ffe3ec;
-  --ink: #f4f1ea;
-  --ink-dim: #c8c3d6;
+  /* Palette — "Spirit Blossom": misty light, luminous magenta & spirit cyan,
+     red lacquer for the torii. Light & ethereal, not a dark night. */
+  --mist-100: #f6f2fb; /* almost-white lavender mist */
+  --mist-200: #ece3f6;
+  --mist-300: #dccdec;
+  --spirit-cyan: #35e6e0; /* glowing teal spirits / fox-fire */
+  --spirit-cyan-deep: #0fb8c8;
+  --blossom: #ff5fb0; /* vivid magenta blossom */
+  --blossom-deep: #e01f88;
+  --blossom-soft: #ffc2e2;
+  --lacquer: #c81e33; /* torii red */
+  --lacquer-bright: #ec3350;
+  --lacquer-deep: #97121f;
+  --gold: #f0c06a;
+  --gold-soft: #ffe0a8;
+  --ink: #2a1740; /* deep plum ink — reads on light mist */
+  --ink-dim: #6a5786;
+  --ink-soft: #8a78a4;
+  --paper: #ffffff;
 
   --font-display: 'Shippori Mincho', 'Noto Sans JP', serif;
   --font-ui: 'Zen Maru Gothic', 'Noto Sans JP', system-ui, sans-serif;
   --font-jp: 'Noto Sans JP', 'Zen Maru Gothic', sans-serif;
 
-  color-scheme: dark;
+  color-scheme: light;
   font-family: var(--font-ui);
   color: var(--ink);
 }
@@ -37,28 +44,28 @@ body,
 body {
   min-height: 100%;
   background:
-    radial-gradient(1200px 700px at 50% -10%, rgba(183, 48, 63, 0.35), transparent 60%),
-    radial-gradient(900px 600px at 85% 15%, rgba(232, 195, 122, 0.14), transparent 55%),
-    radial-gradient(1000px 800px at 10% 90%, rgba(247, 199, 214, 0.12), transparent 55%),
-    linear-gradient(160deg, var(--indigo-950), var(--indigo-900) 55%, #0a0e1c);
+    radial-gradient(900px 620px at 82% 12%, rgba(53, 230, 224, 0.28), transparent 60%),
+    radial-gradient(1000px 700px at 12% 18%, rgba(255, 95, 176, 0.26), transparent 60%),
+    radial-gradient(1100px 900px at 70% 96%, rgba(53, 230, 224, 0.2), transparent 62%),
+    radial-gradient(1200px 800px at 25% 88%, rgba(255, 95, 176, 0.16), transparent 60%),
+    radial-gradient(1400px 900px at 50% 30%, rgba(255, 255, 255, 0.9), transparent 70%),
+    linear-gradient(165deg, #efe6fb 0%, #e6ecfb 45%, #f3e8f7 100%);
   background-attachment: fixed;
   overflow-x: hidden;
 }
 
-/* Subtle "washi paper" grain + a distant rising-sun ray band */
+/* Soft luminous mist band drifting across the scene */
 body::before {
   content: '';
   position: fixed;
-  inset: 0;
+  inset: -20% -10%;
   pointer-events: none;
-  background-image: repeating-linear-gradient(
-    115deg,
-    rgba(255, 255, 255, 0.015) 0px,
-    rgba(255, 255, 255, 0.015) 2px,
-    transparent 2px,
-    transparent 7px
-  );
   z-index: 0;
+  background:
+    radial-gradient(60% 40% at 30% 40%, rgba(255, 255, 255, 0.55), transparent 70%),
+    radial-gradient(50% 35% at 75% 60%, rgba(210, 240, 255, 0.5), transparent 70%);
+  filter: blur(30px);
+  opacity: 0.8;
 }
 
 button {
@@ -66,6 +73,6 @@ button {
 }
 
 ::selection {
-  background: var(--lacquer-bright);
-  color: var(--ink);
+  background: var(--blossom);
+  color: var(--paper);
 }

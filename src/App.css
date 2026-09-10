@@ -55,6 +55,30 @@
   justify-content: center;
 }
 
+/* Widen to fit the winners side panel without shrinking the stage. */
+.app__main--with-winners {
+  max-width: 1340px;
+}
+
+/* With the tall winners panel, anchor content to the top so nothing is clipped
+   above the fold — spacing of the header/title is left untouched. */
+.app:has(.app__main--with-winners) {
+  justify-content: flex-start;
+}
+
+/* -------------------------------------------------------------- stage layout */
+.stage-layout {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  gap: clamp(1rem, 2.5vw, 2rem);
+}
+
+.stage-layout .stage {
+  flex: 0 1 auto;
+}
+
 /* -------------------------------------------------------------- file drop */
 .file-drop {
   width: min(560px, 100%);
@@ -227,22 +251,25 @@
   border-radius: 11px;
 }
 
-/* Painted, matte blossom button — soft ink outline, gentle shadow, no neon. */
+/* Warm-wood button, matching the reel frame — sober, no neon, no candy pink. */
 .btn--primary {
-  color: #fff;
-  background: linear-gradient(180deg, #f76bb0 0%, #e0478f 55%, #c93277 100%);
-  border: 1px solid rgba(150, 30, 90, 0.4);
+  color: #fdf3e2;
+  background: linear-gradient(180deg, #a9743f 0%, #8a5a2c 55%, #6f461f 100%);
+  border: 1px solid rgba(70, 44, 20, 0.55);
+  text-shadow: 0 1px 1px rgba(60, 36, 14, 0.4);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 10px 22px -12px rgba(160, 40, 100, 0.65);
+    inset 0 1px 0 rgba(255, 240, 216, 0.4),
+    inset 0 -2px 4px rgba(60, 36, 14, 0.3),
+    0 10px 22px -12px rgba(70, 44, 20, 0.6);
 }
 
 .btn--primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  filter: brightness(1.04);
+  filter: brightness(1.05);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 16px 30px -12px rgba(160, 40, 100, 0.75);
+    inset 0 1px 0 rgba(255, 240, 216, 0.5),
+    inset 0 -2px 4px rgba(60, 36, 14, 0.3),
+    0 16px 30px -12px rgba(70, 44, 20, 0.7);
 }
 
 .btn--ghost {
@@ -460,57 +487,106 @@
 }
 
 /* --------------------------------------------------------------- winners */
+/* Side panel to the right of the stage; capped to the viewport, the list
+   scrolls internally once it outgrows the available height. */
 .winners {
-  width: min(560px, 100%);
-  background: rgba(255, 251, 244, 0.8);
+  flex: 0 0 clamp(230px, 22vw, 300px);
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 4rem);
+  background: rgba(255, 251, 244, 0.82);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(150, 110, 70, 0.28);
   border-radius: 18px;
-  padding: 1.25rem 1.5rem;
+  padding: 1.1rem 1.1rem 0.6rem;
   box-shadow: 0 18px 44px -30px rgba(90, 60, 40, 0.5);
 }
 
 .winners__title {
-  margin: 0 0 0.75rem;
+  flex: none;
+  margin: 0 0 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   color: #7a1f52;
+}
+
+.winners__count {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6a4a2e;
+  background: rgba(180, 120, 70, 0.16);
+  border: 1px solid rgba(150, 110, 70, 0.28);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
 }
 
 .winners__list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 0.35rem 0.5rem 0;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.35rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(150, 110, 70, 0.5) transparent;
+}
+
+.winners__list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.winners__list::-webkit-scrollbar-thumb {
+  background: rgba(150, 110, 70, 0.4);
+  border-radius: 999px;
 }
 
 .winners__item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0.6rem;
+  gap: 0.6rem;
+  padding: 0.45rem 0.55rem;
   border-radius: 10px;
   background: rgba(180, 120, 70, 0.1);
 }
 
 .winners__rank {
   flex: none;
-  width: 1.8rem;
-  height: 1.8rem;
+  width: 1.7rem;
+  height: 1.7rem;
   display: grid;
   place-items: center;
   border-radius: 999px;
   font-weight: 700;
-  font-size: 0.85rem;
-  color: #fff;
-  background: linear-gradient(135deg, #e0478f, #c93277);
+  font-size: 0.8rem;
+  color: #fff8ec;
+  background: linear-gradient(160deg, #b98a4e, #8a5a2c);
 }
 
 .winners__name {
   font-weight: 600;
+  font-size: 0.95rem;
   color: #4a2038;
+}
+
+/* Narrow screens: panel drops below the stage, with a modest capped height. */
+@media (max-width: 900px) {
+  .stage-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .winners {
+    flex: none;
+    width: min(560px, 100%);
+    align-self: auto;
+    max-height: 42vh;
+  }
 }
 
 /* --------------------------------------------------------------- sakura */

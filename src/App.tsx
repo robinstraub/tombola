@@ -27,17 +27,22 @@ export default function App() {
 
   // A single action drives the whole draw: from idle *or* from a revealed
   // winner it immediately starts spinning again — no intermediate click.
+  // The actual pick happens only when the reel stops, so the winner never
+  // appears in the side list while the wheel is still spinning.
   const spin = useCallback(() => {
     if (phase === 'spinning' || remaining.length === 0) return
 
-    const picked = draw()
-    if (!picked) return
-
-    setWinner(picked)
+    setWinner(null)
     setPhase('spinning')
 
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
     timeoutRef.current = window.setTimeout(() => {
+      const picked = draw()
+      if (!picked) {
+        setPhase('idle')
+        return
+      }
+      setWinner(picked)
       setPhase('revealed')
     }, SPIN_DURATION_MS)
   }, [phase, remaining.length, draw])
@@ -84,46 +89,51 @@ export default function App() {
         <p className="app__subtitle">Tirage au sort — cap sur le pays du soleil levant</p>
       </header>
 
-      <main className="app__main">
+      <main className={`app__main${winners.length > 0 ? ' app__main--with-winners' : ''}`}>
         {!hasParticipants ? (
           <FileDrop onParticipants={handleParticipants} />
         ) : (
-          <div className="stage">
-            <SlotReel phase={phase} winner={winner} />
+          <div className="stage-layout">
+            <div className="stage">
+              <SlotReel phase={phase} winner={winner} />
 
-            <div className="stage__controls">
-              <button
-                type="button"
-                className="btn btn--primary btn--hero"
-                onClick={spin}
-                disabled={phase === 'spinning' || poolEmpty}
-              >
-                {mainButtonLabel}
-              </button>
+              <div className="stage__controls">
+                <button
+                  type="button"
+                  className="btn btn--primary btn--hero"
+                  onClick={spin}
+                  disabled={phase === 'spinning' || poolEmpty}
+                >
+                  {mainButtonLabel}
+                </button>
 
-              <div className="stage__controls-secondary">
-                <button type="button" className="btn btn--ghost btn--sm" onClick={restart}>
-                  Réinitialiser
-                </button>
-                <button type="button" className="btn btn--ghost btn--sm" onClick={clearAll}>
-                  Changer de fichier
-                </button>
+                <div className="stage__controls-secondary">
+                  <button type="button" className="btn btn--ghost btn--sm" onClick={restart}>
+                    Réinitialiser
+                  </button>
+                  <button type="button" className="btn btn--ghost btn--sm" onClick={clearAll}>
+                    Changer de fichier
+                  </button>
+                </div>
+              </div>
+
+              <div className="stage__meta">
+                {fileName && <span className="chip">{fileName}</span>}
+                <span className="chip">
+                  {remaining.length} restant{remaining.length > 1 ? 's' : ''} /{' '}
+                  {participants.length}
+                </span>
+                <span className="chip">
+                  {winners.length} tiré{winners.length > 1 ? 's' : ''}
+                </span>
               </div>
             </div>
 
-            <div className="stage__meta">
-              {fileName && <span className="chip">{fileName}</span>}
-              <span className="chip">
-                {remaining.length} restant{remaining.length > 1 ? 's' : ''} / {participants.length}
-              </span>
-              <span className="chip">
-                {winners.length} tiré{winners.length > 1 ? 's' : ''}
-              </span>
-            </div>
-
             {winners.length > 0 && (
-              <section className="winners">
-                <h2 className="winners__title">Gagnants</h2>
+              <aside className="winners">
+                <h2 className="winners__title">
+                  Gagnants <span className="winners__count">{winners.length}</span>
+                </h2>
                 <ol className="winners__list">
                   {winners.map((w, i) => (
                     <li key={w.id} className="winners__item">
@@ -132,7 +142,7 @@ export default function App() {
                     </li>
                   ))}
                 </ol>
-              </section>
+              </aside>
             )}
           </div>
         )}

@@ -5,10 +5,11 @@ export class ParseError extends Error {}
 /**
  * Reads a spreadsheet (xlsx/xls/csv) and extracts a list of participants.
  *
- * Heuristics kept deliberately simple: we look at the first worksheet, try to
- * find a column that looks like a name (header contains "nom", "name",
- * "prénom", "participant"...) and otherwise fall back to the first column.
- * Empty cells and an eventual header row are skipped.
+ * Contract: any CSV/XLSX works. We read the first worksheet and, if the header
+ * row happens to name a column ("nom", "name", "président"...), we use it as a
+ * convenience — but the default and fallback is always the FIRST column. So a
+ * plain file with names in column A just works. Empty cells, a leading header
+ * row, and duplicates are skipped.
  */
 export async function parseParticipants(file: File): Promise<Participant[]> {
   // Loaded lazily so the ~500 kB SheetJS bundle is only fetched when a user
@@ -16,10 +17,18 @@ export async function parseParticipants(file: File): Promise<Participant[]> {
   const XLSX = await import('xlsx')
 
   const buffer = await file.arrayBuffer()
+  const isCsv = /\.csv$/i.test(file.name) || file.type === 'text/csv'
 
   let workbook: ReturnType<typeof XLSX.read>
   try {
-    workbook = XLSX.read(buffer, { type: 'array' })
+    if (isCsv) {
+      // Decode CSV explicitly as UTF-8 so accented names (René, Éric…) are not
+      // mangled; SheetJS's binary path can misread the encoding otherwise.
+      const text = new TextDecoder('utf-8').decode(buffer)
+      workbook = XLSX.read(text, { type: 'string' })
+    } else {
+      workbook = XLSX.read(buffer, { type: 'array' })
+    }
   } catch (cause) {
     throw new ParseError('Impossible de lire le fichier. Vérifie que c’est bien un .xlsx / .csv.', {
       cause,
@@ -42,8 +51,12 @@ export async function parseParticipants(file: File): Promise<Participant[]> {
     throw new ParseError('La feuille est vide.')
   }
 
-  const nameColumn = findNameColumn(rows)
-  const startRow = looksLikeHeader(rows[0]) ? 1 : 0
+  // Only treat the first row as a header when it explicitly names a column
+  // ("Nom", "Président"...). Otherwise every row is data — this guarantees a
+  // plain list of names never loses its first entry.
+  const headerColumn = findHeaderColumn(rows[0])
+  const nameColumn = headerColumn ?? 0
+  const startRow = headerColumn === null ? 0 : 1
 
   const seen = new Set<string>()
   const participants: Participant[] = []
@@ -68,23 +81,28 @@ export async function parseParticipants(file: File): Promise<Participant[]> {
   return participants
 }
 
-const NAME_HEADER_HINTS = ['nom', 'name', 'prénom', 'prenom', 'participant', 'gagnant', 'personne']
+const NAME_HEADER_HINTS = [
+  'nom',
+  'name',
+  'prénom',
+  'prenom',
+  'participant',
+  'gagnant',
+  'personne',
+  'président',
+  'president',
+]
 
-function findNameColumn(rows: unknown[][]): number {
-  const header = rows[0]
-  if (looksLikeHeader(header)) {
-    const index = header.findIndex((cell) =>
-      NAME_HEADER_HINTS.some((hint) => String(cell).toLocaleLowerCase().includes(hint)),
-    )
-    if (index >= 0) return index
-  }
-  return 0
-}
-
-/** A header row is one where no cell looks like a number. */
-function looksLikeHeader(row: unknown[] | undefined): boolean {
-  if (!row || row.length === 0) return false
-  const nonEmpty = row.filter((cell) => String(cell ?? '').trim() !== '')
-  if (nonEmpty.length === 0) return false
-  return nonEmpty.every((cell) => Number.isNaN(Number(String(cell).trim())))
+/**
+ * If the first row looks like a header naming a column ("Nom", "Président"...),
+ * returns that column's index. Returns `null` when there is no recognisable
+ * header — in that case the caller falls back to the first column and keeps
+ * every row as data.
+ */
+function findHeaderColumn(header: unknown[] | undefined): number | null {
+  if (!header || header.length === 0) return null
+  const index = header.findIndex((cell) =>
+    NAME_HEADER_HINTS.some((hint) => String(cell).toLocaleLowerCase().includes(hint)),
+  )
+  return index >= 0 ? index : null
 }

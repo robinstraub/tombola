@@ -5,6 +5,7 @@ import { FileDrop } from './components/FileDrop'
 import { SakuraBackground } from './components/SakuraBackground'
 import { SlotReel } from './components/SlotReel'
 import { useDraw } from './hooks/useDraw'
+import { prizeForRank } from './lib/prizes'
 import type { DrawPhase, Participant } from './types'
 
 const SPIN_MIN_MS = 500
@@ -87,9 +88,9 @@ export default function App() {
       <SakuraBackground count={14} />
 
       <header className="app__header">
-        <p className="app__eyebrow">道場 · DŌJŌ</p>
-        <h1 className="app__title">Tombola du Japon</h1>
-        <p className="app__subtitle">Tirage au sort — cap sur le pays du soleil levant</p>
+        <p className="app__eyebrow">柔道 · JUDO PAYS VILAINE</p>
+        <h1 className="app__title">Grande Tombola Solidaire</h1>
+        <p className="app__subtitle">Tirage au sort — cap sur le Japon 🇯🇵</p>
       </header>
 
       <main className={`app__main${winners.length > 0 ? ' app__main--with-winners' : ''}`}>
@@ -153,15 +154,21 @@ export default function App() {
             {winners.length > 0 && (
               <aside className="winners">
                 <h2 className="winners__title">
-                  Gagnants <span className="winners__count">{winners.length}</span>
+                  Gagnants &amp; lots <span className="winners__count">{winners.length}</span>
                 </h2>
                 <ol className="winners__list">
-                  {winners.map((w, i) => (
-                    <li key={w.id} className="winners__item">
-                      <span className="winners__rank">{i + 1}</span>
-                      <span className="winners__name">{w.name}</span>
-                    </li>
-                  ))}
+                  {winners.map((w, i) => {
+                    const prize = prizeForRank(i)
+                    return (
+                      <li key={w.id} className="winners__item">
+                        <span className="winners__rank">{i + 1}</span>
+                        <span className="winners__body">
+                          <span className="winners__name">{w.name}</span>
+                          {prize && <span className="winners__prize">{prize}</span>}
+                        </span>
+                      </li>
+                    )
+                  })}
                 </ol>
               </aside>
             )}

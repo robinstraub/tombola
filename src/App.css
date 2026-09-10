@@ -658,10 +658,23 @@
   background: linear-gradient(160deg, #b98a4e, #8a5a2c);
 }
 
+.winners__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
 .winners__name {
   font-weight: 600;
   font-size: 0.95rem;
   color: #4a2038;
+}
+
+.winners__prize {
+  font-size: 0.78rem;
+  line-height: 1.2;
+  color: #8a5a2c;
 }
 
 /* Narrow screens: panel drops below the stage, with a modest capped height. */

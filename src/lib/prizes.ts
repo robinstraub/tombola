@@ -20,6 +20,14 @@ export const PRIZES: string[] = [
 /** Sens de tirage des lots. */
 export type PrizeOrder = 'smallToBig' | 'bigToSmall'
 
+/** La liste des lots dans l'ordre de tirage effectif choisi. */
+export function orderedPrizes(order: PrizeOrder = 'smallToBig'): string[] {
+  return order === 'bigToSmall' ? [...PRIZES].reverse() : PRIZES
+}
+
+/** Nombre total de lots. */
+export const PRIZE_COUNT = PRIZES.length
+
 /**
  * Lot associé à un rang de tirage (1er tiré = rang 0).
  *
@@ -30,6 +38,5 @@ export type PrizeOrder = 'smallToBig' | 'bigToSmall'
  * Au-delà de la liste des lots, renvoie `null` (tirages « hors lot »).
  */
 export function prizeForRank(rank: number, order: PrizeOrder = 'smallToBig'): string | null {
-  const list = order === 'bigToSmall' ? [...PRIZES].reverse() : PRIZES
-  return list[rank] ?? null
+  return orderedPrizes(order)[rank] ?? null
 }

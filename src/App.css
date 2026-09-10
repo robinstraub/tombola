@@ -26,6 +26,8 @@
 }
 
 .app__header {
+  position: relative;
+  z-index: 20;
   text-align: center;
   /* soft halo so the title reads over the painted mist */
   padding: 0.5rem 2rem;
@@ -67,9 +69,10 @@
   justify-content: center;
 }
 
-/* Widen to fit the winners side panel without shrinking the stage. */
+/* Widen to fit the two side panels (lots left, winners right) without
+   shrinking the stage. */
 .app__main--with-winners {
-  max-width: 1340px;
+  max-width: 1600px;
 }
 
 /* With the tall winners panel, anchor content to the top and pin the whole app
@@ -699,11 +702,126 @@
   text-shadow: 0 1px 0 rgba(255, 252, 245, 0.7);
 }
 
+/* ----------------------------------------------------------------- prizes */
+/* Left panel mirroring the winners: the full lot list in draw order, with the
+   won ones ticked, the next one highlighted, and a "X restants" counter to
+   build anticipation. */
+.prizes {
+  flex: 0 0 clamp(260px, 22vw, 340px);
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+  background: rgba(255, 251, 244, 0.82);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(150, 110, 70, 0.28);
+  border-radius: 18px;
+  padding: 1.1rem 1.1rem 0.6rem;
+  box-shadow: 0 18px 44px -30px rgba(90, 60, 40, 0.5);
+}
+
+.prizes__title {
+  flex: none;
+  margin: 0 0 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--title-color);
+}
+
+.prizes__count {
+  margin-left: auto;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6a4a2e;
+  background: rgba(180, 120, 70, 0.16);
+  border: 1px solid rgba(150, 110, 70, 0.28);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+}
+
+.prizes__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.35rem 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(150, 110, 70, 0.5) transparent;
+}
+
+.prizes__list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.prizes__list::-webkit-scrollbar-thumb {
+  background: rgba(150, 110, 70, 0.4);
+  border-radius: 999px;
+}
+
+.prizes__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 10px;
+  background: rgba(180, 120, 70, 0.1);
+  transition:
+    background 0.25s ease,
+    opacity 0.25s ease;
+}
+
+/* Already won: dimmed and ticked. */
+.prizes__item--won {
+  opacity: 0.5;
+}
+
+.prizes__item--won .prizes__name {
+  text-decoration: line-through;
+  text-decoration-color: rgba(90, 60, 40, 0.4);
+}
+
+/* The lot up for grabs right now: highlighted to draw the eye. */
+.prizes__item--next {
+  background: rgba(230, 170, 70, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(180, 120, 40, 0.5);
+}
+
+.prizes__rank {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #fff8ec;
+  background: linear-gradient(160deg, #b98a4e, #8a5a2c);
+}
+
+.prizes__item--next .prizes__rank {
+  background: linear-gradient(160deg, #e6a83c, #c8801a);
+}
+
+.prizes__name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.2;
+  color: #4a2038;
+}
+
 /* --------------------------------------------------------------- winners */
 /* Side panel to the right of the stage; capped to the viewport, the list
    scrolls internally once it outgrows the available height. */
 .winners {
-  flex: 0 0 clamp(230px, 22vw, 300px);
+  flex: 0 0 clamp(280px, 24vw, 360px);
   align-self: stretch;
   display: flex;
   flex-direction: column;
@@ -804,18 +922,24 @@
   color: #8a5a2c;
 }
 
-/* Narrow screens: panel drops below the stage, with a modest capped height. */
-@media (max-width: 900px) {
+/* Narrow screens: panels drop below the stage, each with a capped height.
+   Order: stage first, then lots, then winners. */
+@media (max-width: 1100px) {
   .stage-layout {
     flex-direction: column;
     align-items: center;
   }
 
+  .stage {
+    order: -1;
+  }
+
+  .prizes,
   .winners {
     flex: none;
     width: min(560px, 100%);
     align-self: auto;
-    max-height: 42vh;
+    max-height: 38vh;
   }
 }
 
@@ -925,11 +1049,22 @@
     linear-gradient(180deg, #fdf6e6, #f8ecc9);
 }
 
-/* The winners side panel gets a gold border to match. */
-:root[data-theme='poster'] .winners {
+/* The side panels get a gold border to match. */
+:root[data-theme='poster'] .winners,
+:root[data-theme='poster'] .prizes {
   border-color: rgba(180, 120, 40, 0.4);
 }
 
-:root[data-theme='poster'] .winners__rank {
+:root[data-theme='poster'] .winners__rank,
+:root[data-theme='poster'] .prizes__rank {
   background: linear-gradient(160deg, #e4342b, #a01818);
+}
+
+:root[data-theme='poster'] .prizes__item--next {
+  background: rgba(228, 52, 43, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(180, 28, 28, 0.5);
+}
+
+:root[data-theme='poster'] .prizes__item--next .prizes__rank {
+  background: linear-gradient(160deg, #f0c040, #d89a1e);
 }

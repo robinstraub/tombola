@@ -7,7 +7,7 @@ import { SakuraBackground } from './components/SakuraBackground'
 import { SlotReel } from './components/SlotReel'
 import { ThemeSwitcher } from './components/ThemeSwitcher'
 import { useDraw } from './hooks/useDraw'
-import { type PrizeOrder, prizeForRank } from './lib/prizes'
+import { PRIZE_COUNT, type PrizeOrder, orderedPrizes, prizeForRank } from './lib/prizes'
 import { DEFAULT_THEME, confettiColorsFor, type ThemeId } from './lib/themes'
 import type { DrawPhase, Participant } from './types'
 
@@ -49,6 +49,11 @@ export default function App() {
   // The prize currently in play is the one for the next rank to be drawn,
   // resolved through the chosen draw order (small→big by default).
   const upcomingPrize = prizeForRank(winners.length, prizeOrder)
+
+  // Full lot list (in draw order) for the left progress panel, plus how many
+  // are still up for grabs.
+  const prizeList = orderedPrizes(prizeOrder)
+  const prizesLeft = Math.max(0, PRIZE_COUNT - winners.length)
 
   // First click: announce the prize that's up for grabs (the reel stays calm).
   const announce = useCallback(() => {
@@ -130,11 +135,37 @@ export default function App() {
         <p className="app__subtitle">Tirage au sort — cap sur le Japon 🇯🇵</p>
       </header>
 
-      <main className={`app__main${winners.length > 0 ? ' app__main--with-winners' : ''}`}>
+      <main className={`app__main${hasParticipants ? ' app__main--with-winners' : ''}`}>
         {!hasParticipants ? (
           <FileDrop onParticipants={handleParticipants} />
         ) : (
           <div className="stage-layout">
+            <aside className="prizes">
+              <h2 className="prizes__title">
+                Lots à gagner
+                <span className="prizes__count">
+                  {prizesLeft} restant{prizesLeft > 1 ? 's' : ''}
+                </span>
+              </h2>
+              <ol className="prizes__list">
+                {prizeList.map((prize, i) => {
+                  const won = i < winners.length
+                  const isNext = i === winners.length && !poolEmpty
+                  return (
+                    <li
+                      key={`${i}-${prize}`}
+                      className={`prizes__item${won ? ' prizes__item--won' : ''}${
+                        isNext ? ' prizes__item--next' : ''
+                      }`}
+                    >
+                      <span className="prizes__rank">{won ? '✓' : i + 1}</span>
+                      <span className="prizes__name">{prize}</span>
+                    </li>
+                  )
+                })}
+              </ol>
+            </aside>
+
             <div className="stage">
               <SlotReel phase={phase} winner={winner} prize={upcomingPrize} />
 

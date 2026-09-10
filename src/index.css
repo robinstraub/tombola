@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Shippori+Mincho:wght@500;700;800&family=Noto+Sans+JP:wght@400;600;800&display=swap');
+
+:root {
+  /* Palette — indigo dojo night, laque & or, sakura */
+  --indigo-950: #0b1020;
+  --indigo-900: #121a33;
+  --indigo-800: #1b2547;
+  --lacquer: #7a1220;
+  --lacquer-bright: #b5303f;
+  --gold: #e8c37a;
+  --gold-soft: #f3dfae;
+  --sakura: #f7c7d6;
+  --sakura-soft: #ffe3ec;
+  --ink: #f4f1ea;
+  --ink-dim: #c8c3d6;
+
+  --font-display: 'Shippori Mincho', 'Noto Sans JP', serif;
+  --font-ui: 'Zen Maru Gothic', 'Noto Sans JP', system-ui, sans-serif;
+  --font-jp: 'Noto Sans JP', 'Zen Maru Gothic', sans-serif;
+
+  color-scheme: dark;
+  font-family: var(--font-ui);
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100%;
+  background:
+    radial-gradient(1200px 700px at 50% -10%, rgba(183, 48, 63, 0.35), transparent 60%),
+    radial-gradient(900px 600px at 85% 15%, rgba(232, 195, 122, 0.14), transparent 55%),
+    radial-gradient(1000px 800px at 10% 90%, rgba(247, 199, 214, 0.12), transparent 55%),
+    linear-gradient(160deg, var(--indigo-950), var(--indigo-900) 55%, #0a0e1c);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* Subtle "washi paper" grain + a distant rising-sun ray band */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.015) 0px,
+    rgba(255, 255, 255, 0.015) 2px,
+    transparent 2px,
+    transparent 7px
+  );
+  z-index: 0;
+}
+
+button {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--lacquer-bright);
+  color: var(--ink);
+}

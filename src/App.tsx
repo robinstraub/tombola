@@ -1,12 +1,9 @@
 import { useCallback, useRef, useState } from 'react'
 
 import './App.css'
-import { BlossomScene } from './components/BlossomScene'
 import { FileDrop } from './components/FileDrop'
 import { SakuraBackground } from './components/SakuraBackground'
 import { SlotReel } from './components/SlotReel'
-import { Spirits } from './components/Spirits'
-import { Torii } from './components/Torii'
 import { useDraw } from './hooks/useDraw'
 import type { DrawPhase, Participant } from './types'
 
@@ -79,9 +76,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <BlossomScene />
-      <SakuraBackground />
-      <Spirits />
+      <SakuraBackground count={14} />
 
       <header className="app__header">
         <p className="app__eyebrow">道場 · DŌJŌ</p>
@@ -94,10 +89,7 @@ export default function App() {
           <FileDrop onParticipants={handleParticipants} />
         ) : (
           <div className="stage">
-            <div className="stage__gate">
-              <Torii className="stage__torii" />
-              <SlotReel phase={phase} winner={winner} />
-            </div>
+            <SlotReel phase={phase} winner={winner} />
 
             <div className="stage__controls">
               <button

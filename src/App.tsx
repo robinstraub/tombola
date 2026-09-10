@@ -7,13 +7,16 @@ import { SlotReel } from './components/SlotReel'
 import { useDraw } from './hooks/useDraw'
 import type { DrawPhase, Participant } from './types'
 
-const SPIN_DURATION_MS = 3200
+const SPIN_MIN_MS = 500
+const SPIN_MAX_MS = 3200
+const SPIN_DEFAULT_MS = 1600
 
 export default function App() {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [fileName, setFileName] = useState<string | null>(null)
   const [phase, setPhase] = useState<DrawPhase>('idle')
   const [winner, setWinner] = useState<Participant | null>(null)
+  const [spinDuration, setSpinDuration] = useState(SPIN_DEFAULT_MS)
   const timeoutRef = useRef<number | null>(null)
 
   const { remaining, winners, draw, reset } = useDraw(participants)
@@ -44,8 +47,8 @@ export default function App() {
       }
       setWinner(picked)
       setPhase('revealed')
-    }, SPIN_DURATION_MS)
-  }, [phase, remaining.length, draw])
+    }, spinDuration)
+  }, [phase, remaining.length, draw, spinDuration])
 
   const restart = useCallback(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
@@ -106,6 +109,24 @@ export default function App() {
                 >
                   {mainButtonLabel}
                 </button>
+
+                <label className="speed">
+                  <span className="speed__label">Vitesse&nbsp;de&nbsp;la&nbsp;roulette</span>
+                  <input
+                    className="speed__range"
+                    type="range"
+                    min={SPIN_MIN_MS}
+                    max={SPIN_MAX_MS}
+                    step={100}
+                    value={SPIN_MIN_MS + SPIN_MAX_MS - spinDuration}
+                    onChange={(e) =>
+                      setSpinDuration(SPIN_MIN_MS + SPIN_MAX_MS - Number(e.target.value))
+                    }
+                    disabled={phase === 'spinning'}
+                    aria-label="Vitesse de la roulette"
+                  />
+                  <span className="speed__value">{(spinDuration / 1000).toFixed(1)}&nbsp;s</span>
+                </label>
 
                 <div className="stage__controls-secondary">
                   <button type="button" className="btn btn--ghost btn--sm" onClick={restart}>

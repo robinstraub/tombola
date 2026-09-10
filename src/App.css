@@ -60,10 +60,22 @@
   max-width: 1340px;
 }
 
-/* With the tall winners panel, anchor content to the top so nothing is clipped
-   above the fold — spacing of the header/title is left untouched. */
+/* With the tall winners panel, anchor content to the top and pin the whole app
+   to the viewport height. The main region then flexes to fill exactly the space
+   left below the header, so the panel can size itself against *that* space
+   (via flexbox) instead of guessing the header height with a magic number. */
 .app:has(.app__main--with-winners) {
   justify-content: flex-start;
+  height: 100dvh;
+}
+
+.app:has(.app__main--with-winners) .app__main {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.app:has(.app__main--with-winners) .stage-layout {
+  height: 100%;
 }
 
 /* -------------------------------------------------------------- stage layout */
@@ -187,6 +199,80 @@
   flex-direction: column;
   align-items: stretch;
   gap: 0.85rem;
+}
+
+/* Speed slider under the main button */
+.speed {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0 0.4rem;
+  font-size: 0.85rem;
+  color: #6a4a2e;
+}
+
+.speed__label {
+  flex: none;
+  font-weight: 700;
+}
+
+.speed__range {
+  flex: 1 1 auto;
+  height: 22px;
+  margin: 0;
+  cursor: pointer;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.speed__range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #b98a4e, #d8bd93);
+  border: 1px solid rgba(120, 82, 46, 0.4);
+}
+
+.speed__range::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #b98a4e, #d8bd93);
+  border: 1px solid rgba(120, 82, 46, 0.4);
+}
+
+.speed__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -7px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fdf3e2, #a9743f 75%);
+  border: 1px solid rgba(70, 44, 20, 0.55);
+  box-shadow: 0 2px 5px -2px rgba(70, 44, 20, 0.6);
+}
+
+.speed__range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fdf3e2, #a9743f 75%);
+  border: 1px solid rgba(70, 44, 20, 0.55);
+  box-shadow: 0 2px 5px -2px rgba(70, 44, 20, 0.6);
+}
+
+.speed__range:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.speed__value {
+  flex: none;
+  min-width: 2.6rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #4a3016;
 }
 
 .stage__controls-secondary {
@@ -494,7 +580,11 @@
   align-self: stretch;
   display: flex;
   flex-direction: column;
-  max-height: calc(100dvh - 4rem);
+  /* Fill the height handed down by the (flex-sized) stage layout; never taller
+     than that, so the whole app stays within the viewport. The list below is
+     the single scroll region once the names outgrow this box. */
+  min-height: 0;
+  max-height: 100%;
   background: rgba(255, 251, 244, 0.82);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(150, 110, 70, 0.28);

@@ -46,14 +46,24 @@ export default function App() {
     setWinner(null)
   }, [])
 
-  // The prize currently in play is the one for the next rank to be drawn,
-  // resolved through the chosen draw order (small→big by default).
-  const upcomingPrize = prizeForRank(winners.length, prizeOrder)
+  // The prize shown on the centre reel depends on the phase:
+  // - before/while spinning we announce the NEXT rank's prize (winners.length);
+  // - once revealed, `draw()` has already bumped winners.length, so the prize
+  //   just won is the one for the LAST rank (winners.length - 1).
+  const stagePrizeRank = phase === 'revealed' ? winners.length - 1 : winners.length
+  const stagePrize = prizeForRank(stagePrizeRank, prizeOrder)
 
-  // Full lot list (in draw order) for the left progress panel, plus how many
-  // are still up for grabs.
+  // Full lot list (in draw order) for the left progress panel.
   const prizeList = orderedPrizes(prizeOrder)
-  const prizesLeft = Math.max(0, PRIZE_COUNT - winners.length)
+
+  // The left panel must stay in sync with what the CENTRE reel is showing.
+  // During `revealed`, `draw()` has already bumped winners.length, but we're
+  // still celebrating the current draw — so the lot in play (rank
+  // winners.length - 1) is highlighted as "in progress", not yet ticked off.
+  // It only settles once the user clicks "Lot suivant".
+  const inPlayRank = phase === 'revealed' ? winners.length - 1 : winners.length
+  const settledCount = phase === 'revealed' ? winners.length - 1 : winners.length
+  const prizesLeft = Math.max(0, PRIZE_COUNT - settledCount)
 
   // First click: announce the prize that's up for grabs (the reel stays calm).
   const announce = useCallback(() => {
@@ -149,13 +159,13 @@ export default function App() {
               </h2>
               <ol className="prizes__list">
                 {prizeList.map((prize, i) => {
-                  const won = i < winners.length
-                  const isNext = i === winners.length && !poolEmpty
+                  const won = i < settledCount
+                  const inPlay = i === inPlayRank && !poolEmpty
                   return (
                     <li
                       key={`${i}-${prize}`}
                       className={`prizes__item${won ? ' prizes__item--won' : ''}${
-                        isNext ? ' prizes__item--next' : ''
+                        inPlay ? ' prizes__item--next' : ''
                       }`}
                     >
                       <span className="prizes__rank">{won ? '✓' : i + 1}</span>
@@ -167,7 +177,7 @@ export default function App() {
             </aside>
 
             <div className="stage">
-              <SlotReel phase={phase} winner={winner} prize={upcomingPrize} />
+              <SlotReel phase={phase} winner={winner} prize={stagePrize} />
 
               <div className="stage__controls">
                 <button
